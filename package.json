@@ -1,0 +1,36 @@
+{
+  "name": "versioner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "author": "MWarCZ",
+  "license": "MIT",
+  "env": {
+    "path": {
+      "dist": "dist",
+      "src": "src"
+    }
+  },
+  "scripts": {
+    "start": "node $npm_package_env_path_dist/index.js",
+    "prebuild": "$npm_execpath run build:clean",
+    "build": "$npm_execpath run tsc",
+    "build:clean": "rimraf $npm_package_env_path_dist",
+    "lint": "tslint -c tslint.json -p tsconfig.json --format codeFrame",
+    "lint:fix": "$npm_execpath run lint --fix",
+    "tsnode": "ts-node $npm_package_env_path_src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.2",
+    "rimraf": "^3.0.0",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.18.0",
+    "tslint-clean-code": "^0.2.9",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "@types/minimist": "^1.2.0",
+    "minimist": "^1.2.0"
+  }
+}
