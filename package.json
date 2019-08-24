@@ -18,11 +18,13 @@
     "build:clean": "rimraf $npm_package_env_path_dist",
     "lint": "tslint -c tslint.json -p tsconfig.json --format codeFrame",
     "lint:fix": "$npm_execpath run lint --fix",
-    "tsnode": "ts-node $npm_package_env_path_src/index.ts",
+    "tsnode": "NODE_ENV='DEBUG' ts-node $npm_package_env_path_src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+    "@types/minimist": "^1.2.0",
     "@types/node": "^12.7.2",
+    "@types/semver": "^6.0.1",
     "rimraf": "^3.0.0",
     "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
@@ -30,7 +32,8 @@
     "typescript": "^3.5.3"
   },
   "dependencies": {
-    "@types/minimist": "^1.2.0",
-    "minimist": "^1.2.0"
+    "js-logger": "^1.6.0",
+    "minimist": "^1.2.0",
+    "semver": "^6.3.0"
   }
 }
