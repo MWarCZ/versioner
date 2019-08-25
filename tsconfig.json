@@ -1,7 +1,7 @@
 {
    "compilerOptions": {
     "outDir": "dist/",
-    "rootDir": "src/",
+    "rootDir": ".",
 
     "target": "es6",
     "module": "commonjs",
@@ -30,8 +30,8 @@
     // "strictNullChecks": true,
     // "strictPropertyInitialization": true,
 
-    "esModuleInterop": true
-
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
   "compileOnSave": false,
   "include": [

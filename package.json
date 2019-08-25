@@ -1,8 +1,8 @@
 {
   "name": "versioner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "author": "MWarCZ",
   "license": "MIT",
   "env": {
@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "start": "node $npm_package_env_path_dist/index.js",
+    "start": "node $npm_package_main",
     "prebuild": "$npm_execpath run build:clean",
     "build": "$npm_execpath run tsc",
     "build:clean": "rimraf $npm_package_env_path_dist",
