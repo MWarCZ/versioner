@@ -58,6 +58,41 @@ export function selectCLIActitity(argv:ParsedArgs):CLIActivity {
   return 'unknown'
 }
 
+export function printHelp(lang:string = 'cs-cz') {
+  if (lang === 'cs-cz') {
+    logger.info(`
+POUŽITÍ:
+  versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>]
+  versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>]
+  versioner [--version | -v]
+  versioner [--help | -h]
+
+PŘEPÍNAČE:
+  -s, --set
+  \tNastaveni konkrétní verze v daném souboru/souborech.
+  \tVerze musí být ve formátu 'Major.Minor.Patch'.
+  -n, --next
+  \tZvýší verzi v souboru dle zadané úrovně.
+  \tMožné úrovně:
+  \t  major, minor, patch, prerelease, premajor, preminor, prepatch
+  -t, --tag
+  \tZmění cestu, kde je hledána verze v souboru.
+  \tPokud není použit přepínač, tak výchozí cesta je 'version'.
+  \tPomocí teček je možné zanořovat se hlouběji do struktury souboru.
+  --preid
+  \tOznačení použíté pro předbežné verze (např. alfa, beta).
+  -v, --version
+  \tVypíše verzi používaného nástroje.
+  -h, --help
+  \tVypíše tuto napovědu.
+    `)
+  } else {
+    logger.info(`
+Help is not in other languages (only 'cs-cz').
+    `)
+  }
+}
+
 // ==========================================
 
 export async function main(precessArgv:any):Promise<number> {
@@ -72,7 +107,7 @@ export async function main(precessArgv:any):Promise<number> {
     logger.info(VERSIONER_VERSION)
 
   } else if (cliActivity === 'help' || !argv._.length) {
-    logger.info('\nNapoveda: ...\n')
+    printHelp()
 
   } else if (cliActivity === 'set') {
     // Ulozi novou verzi do souboru
