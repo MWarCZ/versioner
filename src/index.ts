@@ -1,5 +1,4 @@
-// Project: versioner
-// File: src/index.ts
-import { run } from './app'
+#!/usr/bin/env node
+import { main } from './app'
 
-process.exit(run())
+main(process.argv).then(exitCode => process.exit(exitCode))

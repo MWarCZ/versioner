@@ -1,12 +1,20 @@
-// Project: versioner
-// File: src/app.ts
 import minimist from 'minimist'
-import * as semver from 'semver'
 
-import { readFromJsonFile } from './fileUtils'
+import { version as VERSIONER_VERSION } from '../package.json'
 import logger from './logger'
+import { nextVersion, readVersion, writeVersion } from './mainLib'
 
-export function parseArgs(nodeProcessArgv:string[]) {
+type CLIActivity = 'version'|'help'|'next'|'set'|'get'|'unknown'
+interface ParsedArgs extends minimist.ParsedArgs {
+  set: string,
+  tag: string,
+  next: string,
+  help: boolean,
+  version: boolean,
+  preid: string,
+}
+
+export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
   const options = {
     alias: {
       s: 'set',
@@ -19,6 +27,7 @@ export function parseArgs(nodeProcessArgv:string[]) {
       'set',
       'tag',
       'next',
+      'preid',
     ],
     boolean: [
       'help',
@@ -29,106 +38,95 @@ export function parseArgs(nodeProcessArgv:string[]) {
     },
   }
   const argv = minimist(nodeProcessArgv.slice(2), options)
-  return argv
+  return <ParsedArgs> argv
 }
 
-export function getVersionFromDataObject(objectWithVersion:any, pathToVersionInFile:string):string|undefined {
-  const stepsToVersionInFile: string[] = pathToVersionInFile.split('.')
-  const version: string = stepsToVersionInFile.reduce(
-    // @ts-ignore
-    (ver: string | { [key: string]: string } | undefined, step: string) => ver && ver[step],
-    objectWithVersion,
-  )
-  return (typeof version === 'string') ? version : undefined
+export function selectCLIActitity(argv:ParsedArgs):CLIActivity {
+  // High priority
+  if (argv.help) return 'help'
+
+  const isVersion = !!argv.version
+  const isNext = typeof argv.next === 'string'
+  const isSet = typeof argv.set === 'string'
+  const isPreid = typeof argv.preid === 'string'
+  // Allowed combinations
+  if ( isVersion && !isNext && !isSet && !isPreid) return 'version'
+  if (!isVersion &&  isNext && !isSet) return 'next'
+  if (!isVersion && !isNext &&  isSet && !isPreid) return 'set'
+  if (!isVersion && !isNext && !isSet && !isPreid) return 'get'
+
+  return 'unknown'
 }
 
-export function setVersionToDataObject(objectWithVersion: any, pathToVersionInFile: string, newVersion: string):string|undefined {
-  const stepsToVersionInFile: string[] = pathToVersionInFile.split('.')
-  const result:string|undefined = stepsToVersionInFile.reduce(
-    // @ts-ignore
-    (ver, step, index:number) => {
-      if (typeof ver === 'object') {
-        if (index === stepsToVersionInFile.length - 1) {
-          // Posledni krok => Vloz sem novou verzi
-          ver[step] = newVersion
-        } else if (typeof ver[step] === 'undefined') {
-          // Pokud neexistuje nic, tak vytvor.
-          ver[step] = {}
-        }
-        return ver[step]
+// ==========================================
+
+export async function main(precessArgv:any):Promise<number> {
+  const argv = parseArgs(precessArgv)
+  const cliActivity = selectCLIActitity(argv)
+  let exitCode = 0
+
+  logger.debug(argv)
+  logger.debug(`cliActivity: '${cliActivity}'`)
+
+  if (cliActivity === 'version') {
+    logger.info(VERSIONER_VERSION)
+
+  } else if (cliActivity === 'help' || !argv._.length) {
+    logger.info('\nNapoveda: ...\n')
+
+  } else if (cliActivity === 'set') {
+    // Ulozi novou verzi do souboru
+    const results = await Promise.all(
+      argv._.map(
+        path => writeVersion(path, argv.tag, argv.set).catch(err => err),
+      ),
+    )
+    results.forEach((value, index) => {
+      const {oldVersion, newVersion} = value
+      if (typeof newVersion === 'string') {
+        logger.info(`${argv._[index]}\n${oldVersion} -> ${newVersion}`)
+      } else {
+        logger.error(`${argv._[index]}\n${value.message}`)
+        exitCode = 2
       }
-      return undefined
-    },
-    objectWithVersion,
-  )
-  return result
-}
+    })
 
-export async function runForSingleFile(path:string, argv:any):Promise<number> {
-  let data:any
-  // Read data from json file
-  try {
-    data = await readFromJsonFile(path)
-  } catch (err) {
-    logger.error(`Unable read from file '${path}'.`, err)
-    return 1
-  }
-  // ...
-  const version = getVersionFromDataObject(data, argv.tag)
-  if (typeof version !== 'string' || !semver.valid(version)) {
-    logger.error(`Not found valid version in file '${path}' on '${argv.tag}'`)
-    return 2
-  }
-  logger.info('Old version:', version)
-  const newVersion = semver.inc(version, 'patch')
-  logger.info('New version:', newVersion)
-  if (newVersion) {
-    setVersionToDataObject(data, argv.tag, newVersion)
-    logger.debug(data)
-  }
-  // Write data to json file
-  try {
-    // const saved = await writeToJsonFile(path, data)
-  } catch (err) {
-    logger.error(`Unable write to file '${ path }'.`, err)
-    return 3
-  }
-  return 0
-}
-export function runForMoreFiles(paths:string[], argv:any) {
-  return Promise.all(paths.map((path) => runForSingleFile(path, argv)))
-}
+  } else if (cliActivity === 'next') {
+    const results = await Promise.all(
+      argv._.map(
+        path => nextVersion(path, argv.tag, argv.next || 'patch', argv.preid).catch(err => err),
+      ),
+    )
+    results.forEach((value, index) => {
+      const { oldVersion, newVersion } = value
+      if (typeof newVersion === 'string') {
+        logger.info(`${argv._[index]}\n${oldVersion} -> ${newVersion}`)
+      } else {
+        logger.error(`${argv._[index]}\n${value.message}`)
+        exitCode = 2
+      }
+    })
+  } else if (cliActivity === 'get') {
+    // Ziska a vypise verze v souborech
+    const results = await Promise.all(
+      argv._.map(
+        path => readVersion(path, argv.tag).catch(err => err),
+      ),
+    )
+    results.forEach((value, index) => {
+      if (typeof value === 'string') {
+        logger.info(`${argv._[index]}\n${value}`)
+      } else {
+        logger.error(`${argv._[index]}\n${value.message}`)
+        exitCode = 2
+      }
+    })
 
-
-export function run():number {
-  const argv = parseArgs(process.argv)
-
-  logger.debug('init')
-  logger.debug(`${argv.set} => ${semver.inc(argv.set, 'patch')}`)
-
-  if (argv.help) {
-    logger.info('Napoveda: ...')
-  } else if (argv.version) {
-    logger.info(process.env.npm_package_version)
   } else {
-    logger.debug(argv._)
-    // const result = runForMoreFiles(argv._, argv)
-    let data = {
-      a:1,
-      b:'b',
-      c: {
-        a: 2,
-        b: 'B',
-        c: {
-          a: 3,
-          b: 'Bb',
-        },
-      },
-    }
-    logger.debug(data)
-    logger.debug('r:', setVersionToDataObject(data, argv.tag, 'version'))
-    logger.debug(data)
+    logger.error('Neplatna kombinace parametru.')
+    exitCode = 1
   }
-  return 0
+
+  return exitCode
 }
 
