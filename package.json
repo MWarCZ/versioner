@@ -15,7 +15,8 @@
   "env": {
     "path": {
       "dist": "dist",
-      "src": "src"
+      "src": "src",
+      "testout": "coverage"
     }
   },
   "scripts": {
@@ -26,14 +27,23 @@
     "build:clean": "rimraf $npm_package_env_path_dist",
     "lint": "tslint -c tslint.json -p tsconfig.json --format codeFrame",
     "lint:fix": "$npm_execpath run lint --fix",
-    "tsnode": "NODE_ENV='DEBUG' ts-node $npm_package_env_path_src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --config jest.config.json --forceExit --verbose --detectOpenHandles",
+    "test:watch": "$npm_execpath run test -- --watchAll",
+    "test:clean": "rimraf $npm_package_env_path_testout",
+    "pretest:cov": "$npm_execpath run test:clean",
+    "test:cov": "jest --config jest.config.json --forceExit --coverage --verbose --detectOpenHandles",
+    "test:lint": "tslint -c tslint.json -p tsconfig.test.json --format codeFrame",
+    "clean": "$npm_execpath run build:clean; $npm_execpath run test:clean;",
+    "tsnode": "NODE_ENV='DEBUG' ts-node $npm_package_env_path_src/index.ts"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.18",
     "@types/minimist": "^1.2.0",
     "@types/node": "^12.7.2",
     "@types/semver": "^6.0.1",
+    "jest": "^24.9.0",
     "rimraf": "^3.0.0",
+    "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
     "tslint-clean-code": "^0.2.9",
