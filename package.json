@@ -2,9 +2,16 @@
   "name": "versioner",
   "version": "1.0.1",
   "description": "",
-  "main": "dist/src/index.js",
+  "main": "./dist/src/index.js",
+  "bin": {
+    "versioner": "./dist/src/cli.js"
+  },
   "author": "MWarCZ",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MWarCZ/versioner.git"
+  },
   "env": {
     "path": {
       "dist": "dist",
@@ -12,7 +19,8 @@
     }
   },
   "scripts": {
-    "start": "node $npm_package_main",
+    "env": "env | sort | grep ^npm_ | less",
+    "start": "node $npm_package_bin_versioner",
     "prebuild": "$npm_execpath run build:clean",
     "build": "$npm_execpath run tsc",
     "build:clean": "rimraf $npm_package_env_path_dist",
