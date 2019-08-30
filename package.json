@@ -1,10 +1,10 @@
 {
-  "name": "versioner",
-  "version": "1.1.1-beta.0",
+  "private": true,
+  "name": "versioner-tool",
+  "version": "1.1.1-beta.1",
   "description": "CLI nástroj pro usnadnění práce při měnění verze v konfiguračních souborech v projektech. Vhodné pro projekty, kde je verze uložena na více místech.",
   "keywords": [],
   "bugs": "https://github.com/MWarCZ/versioner/issues",
-  "files": ["dist/*"],
   "homepage": "https://github.com/MWarCZ/versioner",
   "repository": {
     "type": "git",
@@ -12,9 +12,9 @@
   },
   "license": "MIT",
   "author": "MWarCZ",
-  "main": "./dist/src/index.js",
+  "main": "./src/index.js",
   "bin": {
-    "versioner": "./dist/src/cli.js"
+    "versioner": "./src/cli.js"
   },
   "env": {
     "path": {
@@ -24,9 +24,10 @@
   },
   "scripts": {
     "env": "env | sort | grep ^npm_ | less",
-    "start": "node $npm_package_bin_versioner",
+    "start": "node $npm_package_env_path_dist/$npm_package_bin_versioner",
     "prebuild": "$npm_execpath run build:clean",
     "build": "$npm_execpath run tsc",
+    "postbuild": "copyfiles README.md dist/",
     "build:clean": "rimraf $npm_package_env_path_dist",
     "lint": "tslint -c tslint.json -p tsconfig.json --format codeFrame",
     "lint:fix": "$npm_execpath run lint --fix",
@@ -37,6 +38,7 @@
     "@types/minimist": "^1.2.0",
     "@types/node": "^12.7.2",
     "@types/semver": "^6.0.1",
+    "copyfiles": "^2.1.1",
     "rimraf": "^3.0.0",
     "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
