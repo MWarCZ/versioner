@@ -1,6 +1,14 @@
-import * as semver from 'semver'
+// import * as semver from 'semver'
+import { inc, ReleaseType, valid } from 'semver'
 
 import { readObjectFromFile, writeObjectToFile } from './fileUtils'
+
+export { ReleaseType } from 'semver'
+
+const semver = {
+  valid,
+  inc,
+}
 
 /**
  * Najde a vrati hodnotu verze v danem objektu dle cesty pokud existuje.
@@ -49,7 +57,7 @@ export function setVersionToDataObject(objectWithVersion: any, pathToVersionInFi
 /**
  * Precte verzi ulozenou v souboru.
  * @param pathToFile Cesta k souboru.
- * @param pathToVersionInFile Cesta pro nalezeni verze v souboru.
+ * @param pathToVersionInFile Cesta pro nalezeni verze v souboru. (pr. `ver`, `info.version`, `path.to.version`)
  * @param fileType Typ souboru (napr. json).
  */
 export async function readVersion(pathToFile: string, pathToVersionInFile: string, fileType: string = 'json') {
@@ -66,7 +74,7 @@ export async function readVersion(pathToFile: string, pathToVersionInFile: strin
 /**
  * Zapise verzi do souboru.
  * @param pathToFile Cesta k souboru.
- * @param pathToVersionInFile Cesta pro nalezeni mista v souboru, kam bude zapsana verze.
+ * @param pathToVersionInFile Cesta pro nalezeni mista v souboru, kam bude zapsana verze. (pr. `ver`, `info.version`, `path.to.version`)
  * @param newVersion Verze ktera bude zapsana do souboru.
  * @param fileType Typ souboru (napr. json).
  */
@@ -83,19 +91,19 @@ export async function writeVersion(pathToFile: string, pathToVersionInFile: stri
 /**
  * Precte puvodni verzi ze souboru ze ktere vygeneruje novou verzi, kterou zapise do souboru.
  * @param pathToFile Cesta k souboru.
- * @param pathToVersionInFile Cesta pro naleyeni mista s verzi souboru, ktera bude zmenena.
+ * @param pathToVersionInFile Cesta pro naleyeni mista s verzi souboru, ktera bude zmenena. (pr. `ver`, `info.version`, `path.to.version`)
  * @param releaseType Typ vydani urcujici, jak se verze zmeni (patch, minor, major, prerelease, pre...).
  * @param identifier Identifikator pro typy vydani obsahujici prefix 'pre' (prereleace, prepatch, preminor, premajor).
  * @param fileType Typ souboru (napr. json).
  */
-export async function nextVersion(pathToFile: string, pathToVersionInFile: string, releaseType: string, identifier?: string, fileType: string = 'json') {
+export async function nextVersion(pathToFile: string, pathToVersionInFile: string, releaseType: ReleaseType, identifier?: string, fileType: string = 'json') {
 
   let data: any = await readObjectFromFile(pathToFile, fileType)
   const oldVersion = getVersionFromDataObject(data, pathToVersionInFile)
   if (typeof oldVersion !== 'string') {
     throw new Error(`Not found version in file '${pathToFile}' on '${pathToVersionInFile}'.`)
   }
-  const newVersion = semver.inc(oldVersion, <semver.ReleaseType> releaseType, undefined, identifier)
+  const newVersion = semver.inc(oldVersion, releaseType, undefined, identifier)
   if (typeof newVersion !== 'string') {
     throw new Error(`Not possible increase version from '${oldVersion}' with release type '${releaseType}'.`)
   }
