@@ -1,16 +1,20 @@
 {
   "name": "versioner",
-  "version": "1.1.0-alfa.0",
-  "description": "",
-  "main": "./dist/src/index.js",
-  "bin": {
-    "versioner": "./dist/src/cli.js"
-  },
-  "author": "MWarCZ",
-  "license": "MIT",
+  "version": "1.1.1-beta.0",
+  "description": "CLI nástroj pro usnadnění práce při měnění verze v konfiguračních souborech v projektech. Vhodné pro projekty, kde je verze uložena na více místech.",
+  "keywords": [],
+  "bugs": "https://github.com/MWarCZ/versioner/issues",
+  "files": ["dist/*"],
+  "homepage": "https://github.com/MWarCZ/versioner",
   "repository": {
     "type": "git",
     "url": "https://github.com/MWarCZ/versioner.git"
+  },
+  "license": "MIT",
+  "author": "MWarCZ",
+  "main": "./dist/src/index.js",
+  "bin": {
+    "versioner": "./dist/src/cli.js"
   },
   "env": {
     "path": {
