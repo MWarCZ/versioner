@@ -2,8 +2,23 @@
 CLI nástroj pro usnadnění práce při měnění verze v konfiguračních souborech v projektech. Vhodné pro projekty, kde je verze uložena na více místech.
  
 ------------
+## Instalace
+- **NPM**
+  - Globální
+    - `npm install --global versioner-tool`
+  - Lokální
+    - `npm install --save-dev versioner-tool`
+    - `npm install -D versioner-tool`
+- **YARN**
+  - Globální
+	- `yarn global add versioner-tool`
+  - Lokální
+    - `yarn add --dev versioner-tool`
+    - `yarn add -D versioner-tool`
 
-## Použití
+--------
+
+## Použití CLI
 ```bash
 versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>]
 versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>]
@@ -34,5 +49,50 @@ versioner [--help | -h]
 	- Vypíše verzi používaného nástroje ***versioner***.
 - **-h, --help**
 	- Vypíše nápovědu k nástroji ***versioner***.
+
+---------
+
+## Použití knihovny
+### Typescript
+```typescript
+import { readVersion, writeVersion, nextVersion, ReleaseType } from 'versioner-tool'
+// nebo
+import * as versioner from 'versioner-tool'
+```
+### Javascript
+```javascript
+const readVersion = require('versioner-tool').readVersion
+const writeVersion = require('versioner-tool').writeVersion
+const nextVersion = require('versioner-tool').nextVersion
+// nebo
+const { readVersion, writeVersion, nextVersion } = require('versioner-tool')
+// nebo
+const versioner = require('versioner-tool')
+```
+### Dokumentace
+```ts
+readVersion(pathToFile: string, pathToVersionInFile: string, fileType: string = 'json'): Promise<string>
+```
+- Precte verzi ulozenou v souboru a vrati ji.
+- `pathToFile`: Cesta k souboru.
+- `pathToVersionInFIle`: Cesta pro nalezeni verze v souboru. (pr. `ver`, `info.version`, `path.to.version`)
+- `fileType`: Typ souboru (napr. json).
+```ts
+writeVersion(pathToFile: string, pathToVersionInFile: string, newVersion: string, fileType: string = 'json'): Promise<{ oldVersion: string | undefined, newVersion: string }>
+```
+- Zapise verzi do souboru a vrati starou a novou verzi.
+- `pathToFile`: Cesta k souboru.
+- `pathToVersionInFile`: Cesta pro nalezeni mista v souboru, kam bude zapsana verze. (pr. `ver`, `info.version`, `path.to.version`)
+- `newVersion`: Verze, ktera bude zapsana do souboru.
+- `fileType`: Typ souboru (napr. json).
+```ts
+nextVersion(pathToFile: string, pathToVersionInFile: string, releaseType: ReleaseType, identifier?: string, fileType: string = 'json'): Promise<{ oldVersion: string, newVersion: string }>
+```
+- Precte puvodni verzi ze souboru ze ktere vygeneruje novou verzi, kterou zapise do souboru.
+- `pathToFile`: Cesta k souboru.
+- `pathToVersionInFile`: Cesta pro naleyeni mista s verzi souboru, ktera bude zmenena. (pr. `ver`, `info.version`, `path.to.version`)
+- `releaseType`: Typ vydani urcujici, jak se verze zmeni (patch, minor, major, prerelease, pre...).
+- `identifier`: Identifikator pro typy vydani obsahujici prefix 'pre' (prereleace, prepatch, preminor, premajor).
+- `fileType`: Typ souboru (napr. json).
 
 ---------------
