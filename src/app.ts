@@ -1,8 +1,8 @@
 import minimist from 'minimist'
 
+import { nextVersion, readVersion, ReleaseType, writeVersion } from '.'
 import { version as VERSIONER_VERSION } from '../package.json'
 import logger from './logger'
-import { nextVersion, readVersion, writeVersion } from './mainLib'
 
 type CLIActivity = 'version'|'help'|'next'|'set'|'get'|'unknown'
 interface ParsedArgs extends minimist.ParsedArgs {
@@ -129,7 +129,7 @@ export async function main(precessArgv:any):Promise<number> {
   } else if (cliActivity === 'next') {
     const results = await Promise.all(
       argv._.map(
-        path => nextVersion(path, argv.tag, argv.next || 'patch', argv.preid).catch(err => err),
+        path => nextVersion(path, argv.tag, <ReleaseType> argv.next || 'patch', argv.preid).catch(err => err),
       ),
     )
     results.forEach((value, index) => {
