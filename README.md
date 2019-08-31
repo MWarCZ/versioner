@@ -20,10 +20,10 @@ CLI nástroj pro usnadnění práce při měnění verze v konfiguračních soub
 
 ## Použití CLI
 ```bash
-versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>]
-versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>]
-versioner [--version | -v]
-versioner [--help | -h]
+versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>] 
+versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
+versioner [-v | --version]
+versioner [-h | --help]
 ```
 ### Přepínače
 - **-s, --set** 
@@ -45,6 +45,9 @@ versioner [--help | -h]
 - **--preid** 
 	- Označení použité pro předběžné verze 
 		- např. `prerelease`, `prepatch`, `preminor`, `premajor`
+- **-f, --file-format**
+    - Určení jakého typu/formátu jsou soubory.
+    - Podporované hodnoty: `json`
 - **-v, --version**
 	- Vypíše verzi používaného nástroje ***versioner***.
 - **-h, --help**

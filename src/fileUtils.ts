@@ -1,5 +1,7 @@
 import fs from 'fs'
 
+export type FileType = 'json'
+
 /**
  * Precte data ze souboru, ktere je mozne nasledne zpracovat zkrze Promise.
  * @param path Cesta k souboru.
@@ -56,16 +58,16 @@ export function writeToJsonFile(path: string, data: any) {
  * @param pathToFile Cesta k souboru.
  * @param fileType Typ souboru ze ktereho ma byt objekt nacten (napr. json).
  */
-export async function readObjectFromFile(pathToFile: string, fileType: string = 'json') {
-  try {
-    if (fileType === 'json') {
+export async function readObjectFromFile(pathToFile: string, fileType: FileType = 'json') {
+  if (fileType === 'json') {
+    try {
       let data = await readFromJsonFile(pathToFile)
       return data
-    } else {
-      throw new Error(`Unknown file type '${fileType}'.`)
+    } catch (err) {
+      throw new Error(`Unable read from file '${pathToFile}'.`)
     }
-  } catch (err) {
-    throw new Error(`Unable read from file '${pathToFile}'.`)
+  } else {
+    throw new Error(`Unknown file type '${fileType}'.`)
   }
 }
 /**
@@ -74,14 +76,14 @@ export async function readObjectFromFile(pathToFile: string, fileType: string = 
  * @param dataObject JS objekt, ktery bude zapsan do souboru.
  * @param fileType Typ souboru ze ktereho ma byt objekt nacten (napr. json).
  */
-export async function writeObjectToFile(pathToFile: string, dataObject: any, fileType: string = 'json') {
-  try {
-    if (fileType === 'json') {
+export async function writeObjectToFile(pathToFile: string, dataObject: any, fileType: FileType = 'json') {
+  if (fileType === 'json') {
+    try {
       await writeToJsonFile(pathToFile, dataObject)
-    } else {
-      throw new Error(`Unknown file type '${fileType}'.`)
+    } catch (err) {
+      throw new Error(`Unable write to file '${pathToFile}'.`)
     }
-  } catch (err) {
-    throw new Error(`Unable write to file '${pathToFile}'.`)
+  } else {
+    throw new Error(`Unknown file type '${fileType}'.`)
   }
 }

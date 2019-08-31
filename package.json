@@ -31,7 +31,7 @@
     "build:clean": "rimraf $npm_package_env_path_dist",
     "lint": "tslint -c tslint.json -p tsconfig.json --format codeFrame",
     "lint:fix": "$npm_execpath run lint --fix",
-    "tsnode": "NODE_ENV='DEBUG' ts-node $npm_package_env_path_src/index.ts",
+    "tsnode": "NODE_ENV='DEBUG' ts-node $npm_package_env_path_src/cli.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

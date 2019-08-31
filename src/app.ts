@@ -1,6 +1,16 @@
 import minimist from 'minimist'
 
-import { nextVersion, readVersion, ReleaseType, writeVersion } from '.'
+import {
+  FileType,
+  nextVersion,
+  NextVersionConfig,
+  readVersion,
+  ReadVersionConfig,
+  ReleaseType,
+  VersionResult,
+  writeVersion,
+  WriteVersionConfig,
+} from '.'
 import { version as VERSIONER_VERSION } from '../package.json'
 import logger from './logger'
 
@@ -12,6 +22,7 @@ interface ParsedArgs extends minimist.ParsedArgs {
   help: boolean,
   version: boolean,
   preid: string,
+  'file-format': string,
 }
 
 export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
@@ -22,12 +33,14 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
       n: 'next',
       h: 'help',
       v: 'version',
+      f: 'file-format',
     },
     string: [
       'set',
       'tag',
       'next',
       'preid',
+      'file-format',
     ],
     boolean: [
       'help',
@@ -35,6 +48,7 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
     ],
     default: {
       tag: 'version',
+      'file-format': 'json',
     },
   }
   const argv = minimist(nodeProcessArgv.slice(2), options)
@@ -44,6 +58,7 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
 export function selectCLIActitity(argv:ParsedArgs):CLIActivity {
   // High priority
   if (argv.help) return 'help'
+  // if (!['json'].includes(argv['file-format'])) return 'unknown'
 
   const isVersion = !!argv.version
   const isNext = typeof argv.next === 'string'
@@ -62,10 +77,10 @@ export function printHelp(lang:string = 'cs-cz') {
   if (lang === 'cs-cz') {
     logger.info(`
 POUŽITÍ:
-  versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>]
-  versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>]
-  versioner [--version | -v]
-  versioner [--help | -h]
+  versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
+  versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
+  versioner [-v | --version]
+  versioner [-h | --help]
 
 PŘEPÍNAČE:
   -s, --set
@@ -81,6 +96,9 @@ PŘEPÍNAČE:
   \tPomocí teček je možné zanořovat se hlouběji do struktury souboru.
   --preid
   \tOznačení použíté pro předbežné verze (např. alfa, beta).
+  -f, --file-format
+  \tUrčeni jakého typu/formátu jsou soubory.
+  \tPodporované hodnoty: 'json'
   -v, --version
   \tVypíše verzi používaného nástroje.
   -h, --help
@@ -113,47 +131,69 @@ export async function main(precessArgv:any):Promise<number> {
     // Ulozi novou verzi do souboru
     const results = await Promise.all(
       argv._.map(
-        path => writeVersion(path, argv.tag, argv.set).catch(err => err),
+        path => {
+          const config: WriteVersionConfig = {
+            newVersion: argv.set,
+            pathToFile: path,
+            pathToVersionInFile: argv.tag,
+            fileType: <FileType> argv['file-format'],
+          }
+          return writeVersion(config).catch(err => err)
+        },
       ),
     )
-    results.forEach((value, index) => {
-      const {oldVersion, newVersion} = value
-      if (typeof newVersion === 'string') {
-        logger.info(`${argv._[index]}\n${oldVersion} -> ${newVersion}`)
-      } else {
+    results.forEach((value: VersionResult|Error, index) => {
+      if (value instanceof Error) {
         logger.error(`${argv._[index]}\n${value.message}`)
         exitCode = 2
+      } else {
+        logger.info(`${argv._[index]}\n${value.oldVersion} -> ${value.newVersion}`)
       }
     })
 
   } else if (cliActivity === 'next') {
     const results = await Promise.all(
       argv._.map(
-        path => nextVersion(path, argv.tag, <ReleaseType> argv.next || 'patch', argv.preid).catch(err => err),
+        path => {
+          const config: NextVersionConfig = {
+            releaseType: <ReleaseType> argv.next || 'patch',
+            pathToFile: path,
+            pathToVersionInFile: argv.tag,
+            identifier: argv.preid,
+            fileType: <FileType> argv['file-format'],
+          }
+          return nextVersion(config).catch(err => err)
+        },
       ),
     )
-    results.forEach((value, index) => {
-      const { oldVersion, newVersion } = value
-      if (typeof newVersion === 'string') {
-        logger.info(`${argv._[index]}\n${oldVersion} -> ${newVersion}`)
-      } else {
+    results.forEach((value: VersionResult|Error, index) => {
+      if (value instanceof Error) {
         logger.error(`${argv._[index]}\n${value.message}`)
         exitCode = 2
+      } else {
+        logger.info(`${argv._[index]}\n${value.oldVersion} -> ${value.newVersion}`)
       }
     })
   } else if (cliActivity === 'get') {
     // Ziska a vypise verze v souborech
     const results = await Promise.all(
       argv._.map(
-        path => readVersion(path, argv.tag).catch(err => err),
+        path => {
+          const config: ReadVersionConfig = {
+            pathToFile: path,
+            pathToVersionInFile: argv.tag,
+            fileType: <FileType> argv['file-format'],
+          }
+          return readVersion(config).catch(err => err)
+        },
       ),
     )
-    results.forEach((value, index) => {
-      if (typeof value === 'string') {
-        logger.info(`${argv._[index]}\n${value}`)
-      } else {
+    results.forEach((value: VersionResult|Error, index) => {
+      if (value instanceof Error) {
         logger.error(`${argv._[index]}\n${value.message}`)
         exitCode = 2
+      } else {
+        logger.info(`${argv._[index]}\n${value.oldVersion}`)
       }
     })
 
