@@ -1,7 +1,16 @@
-import { NextVersionConfig, WriteVersionConfig } from 'mainLib'
 import minimist from 'minimist'
 
-import { nextVersion, readVersion, ReadVersionConfig, ReleaseType, VersionResult, writeVersion } from '.'
+import {
+  FileType,
+  nextVersion,
+  NextVersionConfig,
+  readVersion,
+  ReadVersionConfig,
+  ReleaseType,
+  VersionResult,
+  writeVersion,
+  WriteVersionConfig,
+} from '.'
 import { version as VERSIONER_VERSION } from '../package.json'
 import logger from './logger'
 
@@ -13,6 +22,7 @@ interface ParsedArgs extends minimist.ParsedArgs {
   help: boolean,
   version: boolean,
   preid: string,
+  'file-format': string,
 }
 
 export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
@@ -23,12 +33,14 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
       n: 'next',
       h: 'help',
       v: 'version',
+      f: 'file-format',
     },
     string: [
       'set',
       'tag',
       'next',
       'preid',
+      'file-format',
     ],
     boolean: [
       'help',
@@ -36,6 +48,7 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
     ],
     default: {
       tag: 'version',
+      'file-format': 'json',
     },
   }
   const argv = minimist(nodeProcessArgv.slice(2), options)
@@ -45,6 +58,7 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
 export function selectCLIActitity(argv:ParsedArgs):CLIActivity {
   // High priority
   if (argv.help) return 'help'
+  // if (!['json'].includes(argv['file-format'])) return 'unknown'
 
   const isVersion = !!argv.version
   const isNext = typeof argv.next === 'string'
@@ -63,10 +77,10 @@ export function printHelp(lang:string = 'cs-cz') {
   if (lang === 'cs-cz') {
     logger.info(`
 POUŽITÍ:
-  versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>]
-  versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>]
-  versioner [--version | -v]
-  versioner [--help | -h]
+  versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
+  versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
+  versioner [-v | --version]
+  versioner [-h | --help]
 
 PŘEPÍNAČE:
   -s, --set
@@ -82,6 +96,9 @@ PŘEPÍNAČE:
   \tPomocí teček je možné zanořovat se hlouběji do struktury souboru.
   --preid
   \tOznačení použíté pro předbežné verze (např. alfa, beta).
+  -f, --file-format
+  \tUrčeni jakého typu/formátu jsou soubory.
+  \tPodporované hodnoty: 'json'
   -v, --version
   \tVypíše verzi používaného nástroje.
   -h, --help
@@ -119,6 +136,7 @@ export async function main(precessArgv:any):Promise<number> {
             newVersion: argv.set,
             pathToFile: path,
             pathToVersionInFile: argv.tag,
+            fileType: <FileType> argv['file-format'],
           }
           return writeVersion(config).catch(err => err)
         },
@@ -142,6 +160,7 @@ export async function main(precessArgv:any):Promise<number> {
             pathToFile: path,
             pathToVersionInFile: argv.tag,
             identifier: argv.preid,
+            fileType: <FileType> argv['file-format'],
           }
           return nextVersion(config).catch(err => err)
         },
@@ -163,6 +182,7 @@ export async function main(precessArgv:any):Promise<number> {
           const config: ReadVersionConfig = {
             pathToFile: path,
             pathToVersionInFile: argv.tag,
+            fileType: <FileType> argv['file-format'],
           }
           return readVersion(config).catch(err => err)
         },

@@ -1,9 +1,10 @@
-// import * as semver from 'semver'
 import { inc, ReleaseType, valid } from 'semver'
 
-import { readObjectFromFile, writeObjectToFile } from './fileUtils'
+import { FileType, readObjectFromFile, writeObjectToFile } from './fileUtils'
 
 export { ReleaseType } from 'semver'
+
+export { FileType } from './fileUtils'
 
 export interface VersionResult {
   oldVersion: string | undefined,
@@ -12,19 +13,19 @@ export interface VersionResult {
 export interface ReadVersionConfig {
   pathToFile: string,
   pathToVersionInFile?: string,
-  fileType?: string,
+  fileType?: FileType,
 }
 export interface WriteVersionConfig {
   newVersion: string,
   pathToFile: string,
   pathToVersionInFile?: string,
-  fileType?: string,
+  fileType?: FileType,
 }
 export interface NextVersionConfig {
   releaseType: ReleaseType,
   pathToFile: string,
   pathToVersionInFile?: string,
-  fileType?: string,
+  fileType?: FileType,
   identifier?: string,
 }
 

@@ -9,4 +9,5 @@ export {
   ReadVersionConfig,
   WriteVersionConfig,
   NextVersionConfig,
+  FileType,
 } from './mainLib'
