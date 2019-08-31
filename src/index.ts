@@ -1,2 +1,12 @@
 
-export { readVersion, writeVersion, nextVersion, ReleaseType } from './mainLib'
+export {
+  readVersion,
+  writeVersion,
+  nextVersion,
+  // Types:
+  ReleaseType,
+  VersionResult,
+  ReadVersionConfig,
+  WriteVersionConfig,
+  NextVersionConfig,
+} from './mainLib'

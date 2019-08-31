@@ -1,6 +1,7 @@
+import { NextVersionConfig, WriteVersionConfig } from 'mainLib'
 import minimist from 'minimist'
 
-import { nextVersion, readVersion, ReleaseType, writeVersion } from '.'
+import { nextVersion, readVersion, ReadVersionConfig, ReleaseType, VersionResult, writeVersion } from '.'
 import { version as VERSIONER_VERSION } from '../package.json'
 import logger from './logger'
 
@@ -113,47 +114,66 @@ export async function main(precessArgv:any):Promise<number> {
     // Ulozi novou verzi do souboru
     const results = await Promise.all(
       argv._.map(
-        path => writeVersion(path, argv.tag, argv.set).catch(err => err),
+        path => {
+          const config: WriteVersionConfig = {
+            newVersion: argv.set,
+            pathToFile: path,
+            pathToVersionInFile: argv.tag,
+          }
+          return writeVersion(config).catch(err => err)
+        },
       ),
     )
-    results.forEach((value, index) => {
-      const {oldVersion, newVersion} = value
-      if (typeof newVersion === 'string') {
-        logger.info(`${argv._[index]}\n${oldVersion} -> ${newVersion}`)
-      } else {
+    results.forEach((value: VersionResult|Error, index) => {
+      if (value instanceof Error) {
         logger.error(`${argv._[index]}\n${value.message}`)
         exitCode = 2
+      } else {
+        logger.info(`${argv._[index]}\n${value.oldVersion} -> ${value.newVersion}`)
       }
     })
 
   } else if (cliActivity === 'next') {
     const results = await Promise.all(
       argv._.map(
-        path => nextVersion(path, argv.tag, <ReleaseType> argv.next || 'patch', argv.preid).catch(err => err),
+        path => {
+          const config: NextVersionConfig = {
+            releaseType: <ReleaseType> argv.next || 'patch',
+            pathToFile: path,
+            pathToVersionInFile: argv.tag,
+            identifier: argv.preid,
+          }
+          return nextVersion(config).catch(err => err)
+        },
       ),
     )
-    results.forEach((value, index) => {
-      const { oldVersion, newVersion } = value
-      if (typeof newVersion === 'string') {
-        logger.info(`${argv._[index]}\n${oldVersion} -> ${newVersion}`)
-      } else {
+    results.forEach((value: VersionResult|Error, index) => {
+      if (value instanceof Error) {
         logger.error(`${argv._[index]}\n${value.message}`)
         exitCode = 2
+      } else {
+        logger.info(`${argv._[index]}\n${value.oldVersion} -> ${value.newVersion}`)
       }
     })
   } else if (cliActivity === 'get') {
     // Ziska a vypise verze v souborech
     const results = await Promise.all(
       argv._.map(
-        path => readVersion(path, argv.tag).catch(err => err),
+        path => {
+          const config: ReadVersionConfig = {
+            pathToFile: path,
+            pathToVersionInFile: argv.tag,
+          }
+          return readVersion(config).catch(err => err)
+        },
       ),
     )
-    results.forEach((value, index) => {
-      if (typeof value === 'string') {
-        logger.info(`${argv._[index]}\n${value}`)
-      } else {
+    results.forEach((value: VersionResult|Error, index) => {
+      if (value instanceof Error) {
         logger.error(`${argv._[index]}\n${value.message}`)
         exitCode = 2
+      } else {
+        logger.info(`${argv._[index]}\n${value.oldVersion}`)
       }
     })
 
