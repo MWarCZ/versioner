@@ -10,9 +10,9 @@ import {
   VersionResult,
   writeVersion,
   WriteVersionConfig,
-} from '.'
-import { version as VERSIONER_VERSION } from '../package.json'
-import logger from './logger'
+} from '..'
+import { version as VERSIONER_VERSION } from '../../package.json'
+import logger from '../logger'
 
 type CLIActivity = 'version'|'help'|'next'|'set'|'get'|'unknown'
 interface ParsedArgs extends minimist.ParsedArgs {

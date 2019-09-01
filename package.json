@@ -14,7 +14,7 @@
   "author": "MWarCZ",
   "main": "./src/index.js",
   "bin": {
-    "versioner": "./src/cli.js"
+    "versioner": "./src/cli/index.js"
   },
   "env": {
     "path": {
@@ -31,7 +31,7 @@
     "build:clean": "rimraf $npm_package_env_path_dist",
     "lint": "tslint -c tslint.json -p tsconfig.json --format codeFrame",
     "lint:fix": "$npm_execpath run lint --fix",
-    "tsnode": "NODE_ENV='DEBUG' ts-node $npm_package_env_path_src/cli.ts",
+    "tsnode": "NODE_ENV='DEBUG' ts-node $npm_package_env_path_src/cli/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
