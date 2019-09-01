@@ -1,10 +1,11 @@
 import { inc, ReleaseType, valid } from 'semver'
 
-import { FileType, readObjectFromFile, writeObjectToFile } from './fileUtils'
+import { FileType, readObjectFromFile, writeObjectToFile } from './utils/readWriteFile'
+import { extractDataFromObject, injectDataToObject } from './utils/objectUtils'
 
 export { ReleaseType } from 'semver'
 
-export { FileType } from './fileUtils'
+export { FileType } from './utils/readWriteFile'
 
 export interface VersionResult {
   oldVersion: string | undefined,
@@ -34,56 +35,6 @@ const semver = {
   inc,
 }
 
-/**
- * Najde a vrati hodnotu v danem objektu dle cesty pokud existuje.
- * @param objectWithData JS objekt ve kterem ma byt hledana hodnota.
- * @param pathToDataInFile Cesta pro nalezeni mista s hodnotou v JS objektu.
- */
-export function getDataFromDataObject(
-  objectWithData: any,
-  pathToDataInFile: string,
-): any {
-  const stepsToDataInFile: string[] = pathToDataInFile.split('.')
-  const data: string = stepsToDataInFile.reduce(
-    // @ts-ignore
-    (tmp: any | undefined, step: string) => tmp && tmp[step],
-    objectWithData,
-  )
-  return data
-}
-/**
- * Pokusi se vlozit novou hodnotu do predaneho JS objektu na danou cestu.
- * @param newData Nova hodnota, ktera bude vlozena do objektu.
- * @param objectWithData JS objekt do ktereho bude vlozena hodnota.
- * @param pathToDataInFile Cesta pro nalezeni mista pro vlozeni hodnoty v JS objektu.
- */
-export function setDataToDataObject(
-  newData: any,
-  objectWithData: any,
-  pathToDataInFile: string,
-  ): any {
-  const stepsToDataInFile: string[] = pathToDataInFile.split('.')
-  const result: any = stepsToDataInFile.reduce(
-    // @ts-ignore
-    (tmp, step, index: number) => {
-      if (typeof tmp === 'object') {
-        if (index === stepsToDataInFile.length - 1) {
-          // Posledni krok => Vloz sem nova data
-          tmp[step] = newData
-        } else if (typeof tmp[step] === 'undefined') {
-          // Pokud neexistuje nic, tak vytvor.
-          tmp[step] = {}
-        }
-        return tmp[step]
-      }
-      return undefined
-    },
-    objectWithData,
-  )
-  return result
-}
-
-// ============================================================
 
 /**
  * Precte verzi ulozenou v souboru.
@@ -97,7 +48,7 @@ export async function readVersion({
     fileType = 'json',
 }: ReadVersionConfig ): Promise<VersionResult> {
   let data: any = await readObjectFromFile(pathToFile, fileType)
-  const version = getDataFromDataObject(data, pathToVersionInFile)
+  const version = extractDataFromObject(data, pathToVersionInFile)
   if (typeof version !== 'string') {
     throw new Error(`Not found version in file '${pathToFile}' on '${pathToVersionInFile}'`)
   }
@@ -123,8 +74,8 @@ export async function writeVersion({
     throw new Error(`'${newVersion}' is not valid version.`)
   }
   let data: any = await readObjectFromFile(pathToFile, fileType)
-  const oldVersion = getDataFromDataObject(data, pathToVersionInFile)
-  setDataToDataObject(newVersion, data, pathToVersionInFile)
+  const oldVersion = extractDataFromObject(data, pathToVersionInFile)
+  injectDataToObject(newVersion, data, pathToVersionInFile)
   await writeObjectToFile(pathToFile, data, fileType)
   return { oldVersion, newVersion }
 }
@@ -144,7 +95,7 @@ export async function nextVersion({
   identifier,
 }: NextVersionConfig): Promise<VersionResult> {
   let data: any = await readObjectFromFile(pathToFile, fileType)
-  const oldVersion = getDataFromDataObject(data, pathToVersionInFile)
+  const oldVersion = extractDataFromObject(data, pathToVersionInFile)
   if (typeof oldVersion !== 'string') {
     throw new Error(`Not found version in file '${pathToFile}' on '${pathToVersionInFile}'.`)
   }
@@ -153,7 +104,7 @@ export async function nextVersion({
     throw new Error(`Not possible increase version from '${oldVersion}' with release type '${releaseType}'.`)
   }
 
-  setDataToDataObject(newVersion, data, pathToVersionInFile)
+  injectDataToObject(newVersion, data, pathToVersionInFile)
   await writeObjectToFile(pathToFile, data, fileType)
   return { oldVersion, newVersion }
 }
