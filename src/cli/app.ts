@@ -1,16 +1,6 @@
 import minimist from 'minimist'
 
-import {
-  FileType,
-  nextVersion,
-  NextVersionConfig,
-  readVersion,
-  ReadVersionConfig,
-  ReleaseType,
-  VersionResult,
-  writeVersion,
-  WriteVersionConfig,
-} from '..'
+import { FileType, nextVersion, readVersion, ReleaseType, writeVersion } from '..'
 import { version as VERSIONER_VERSION } from '../../package.json'
 import logger from '../logger'
 
@@ -56,14 +46,18 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
 }
 
 export function selectCLIActitity(argv:ParsedArgs):CLIActivity {
-  // High priority
+  // High priority activity
   if (argv.help) return 'help'
-  // if (!['json'].includes(argv['file-format'])) return 'unknown'
-
+  // May exist
   const isVersion = !!argv.version
   const isNext = typeof argv.next === 'string'
   const isSet = typeof argv.set === 'string'
   const isPreid = typeof argv.preid === 'string'
+  // Must exist
+  const isTag = typeof argv.tag === 'string'
+  const isFileFormat = typeof argv['file-format'] === 'string'
+  // Not allowed combinations
+  if (!isTag || !isFileFormat) return 'unknown'
   // Allowed combinations
   if ( isVersion && !isNext && !isSet && !isPreid) return 'version'
   if (!isVersion &&  isNext && !isSet) return 'next'
@@ -123,85 +117,56 @@ export async function main(precessArgv:any):Promise<number> {
 
   if (cliActivity === 'version') {
     logger.info(VERSIONER_VERSION)
-
   } else if (cliActivity === 'help' || !argv._.length) {
     printHelp()
-
   } else if (cliActivity === 'set') {
     // Ulozi novou verzi do souboru
-    const results = await Promise.all(
-      argv._.map(
-        path => {
-          const config: WriteVersionConfig = {
-            newVersion: argv.set,
-            pathToFile: path,
-            pathToVersionInFile: argv.tag,
-            fileType: <FileType> argv['file-format'],
-          }
-          return writeVersion(config).catch(err => err)
-        },
-      ),
-    )
-    results.forEach((value: VersionResult|Error, index) => {
-      if (value instanceof Error) {
-        logger.error(`${argv._[index]}\n${value.message}`)
+    await Promise.all(argv._.map(path => {
+      return writeVersion({
+        newVersion: argv.set,
+        pathToFile: path,
+        pathToVersionInFile: argv.tag,
+        fileType: <FileType> argv['file-format'],
+      }).then(value => {
+        logger.info(`${path}\n${value.oldVersion} -> ${value.newVersion}`)
+      }).catch(err => {
+        logger.error(`${path}\n${err.message}`)
         exitCode = 2
-      } else {
-        logger.info(`${argv._[index]}\n${value.oldVersion} -> ${value.newVersion}`)
-      }
-    })
-
+      })
+    }))
   } else if (cliActivity === 'next') {
-    const results = await Promise.all(
-      argv._.map(
-        path => {
-          const config: NextVersionConfig = {
-            releaseType: <ReleaseType> argv.next || 'patch',
-            pathToFile: path,
-            pathToVersionInFile: argv.tag,
-            identifier: argv.preid,
-            fileType: <FileType> argv['file-format'],
-          }
-          return nextVersion(config).catch(err => err)
-        },
-      ),
-    )
-    results.forEach((value: VersionResult|Error, index) => {
-      if (value instanceof Error) {
-        logger.error(`${argv._[index]}\n${value.message}`)
+    await Promise.all(argv._.map(path => {
+      return nextVersion({
+        releaseType: <ReleaseType> argv.next || 'patch',
+        pathToFile: path,
+        pathToVersionInFile: argv.tag,
+        identifier: argv.preid,
+        fileType: <FileType> argv['file-format'],
+      }).then(value => {
+        logger.info(`${path}\n${value.oldVersion} -> ${value.newVersion}`)
+      }).catch(err => {
+        logger.error(`${path}\n${err.message}`)
         exitCode = 2
-      } else {
-        logger.info(`${argv._[index]}\n${value.oldVersion} -> ${value.newVersion}`)
-      }
-    })
+      })
+    }))
   } else if (cliActivity === 'get') {
     // Ziska a vypise verze v souborech
-    const results = await Promise.all(
-      argv._.map(
-        path => {
-          const config: ReadVersionConfig = {
-            pathToFile: path,
-            pathToVersionInFile: argv.tag,
-            fileType: <FileType> argv['file-format'],
-          }
-          return readVersion(config).catch(err => err)
-        },
-      ),
-    )
-    results.forEach((value: VersionResult|Error, index) => {
-      if (value instanceof Error) {
-        logger.error(`${argv._[index]}\n${value.message}`)
+    await Promise.all(argv._.map(path => {
+      return readVersion({
+        pathToFile: path,
+        pathToVersionInFile: argv.tag,
+        fileType: <FileType> argv['file-format'],
+      }).then(value => {
+        logger.info(`${path}\n${value.oldVersion}`)
+      }).catch(err => {
+        logger.error(`${path}\n${err.message}`)
         exitCode = 2
-      } else {
-        logger.info(`${argv._[index]}\n${value.oldVersion}`)
-      }
-    })
-
+      })
+    }))
   } else {
-    logger.error('Neplatna kombinace parametru.')
+    logger.error('Invalid parameter combination.')
     exitCode = 1
   }
-
   return exitCode
 }
 
