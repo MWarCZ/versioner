@@ -1,8 +1,8 @@
 import fs from 'fs'
 
 /**
- * Precte data ze souboru, ktere je mozne nasledne zpracovat zkrze Promise.
- * @param path Cesta k souboru.
+ * Read data from file. (Used Promise)
+ * @param path Path to file.
  */
 export function readFileAsync(path: string): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -14,9 +14,9 @@ export function readFileAsync(path: string): Promise<any> {
 }
 
 /**
- * Ulozi data do souboru.
- * @param path Cesta k souboru.
- * @param data Data, ktera budou zapsana do souboru.
+ * Write data to file. (Used Promise)
+ * @param path Path to file.
+ * @param data Data which will be written to file.
  */
 export function writeFileAsync(path: string, data: any) {
   return new Promise((resolve, reject) => {

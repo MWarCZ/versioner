@@ -120,7 +120,7 @@ export async function main(precessArgv:any):Promise<number> {
   } else if (cliActivity === 'help' || !argv._.length) {
     printHelp()
   } else if (cliActivity === 'set') {
-    // Ulozi novou verzi do souboru
+    // Save new version into files.
     await Promise.all(argv._.map(path => {
       return writeVersion({
         newVersion: argv.set,
@@ -135,6 +135,7 @@ export async function main(precessArgv:any):Promise<number> {
       })
     }))
   } else if (cliActivity === 'next') {
+    // Generate and save new version for files.
     await Promise.all(argv._.map(path => {
       return nextVersion({
         releaseType: <ReleaseType> argv.next || 'patch',
@@ -150,7 +151,7 @@ export async function main(precessArgv:any):Promise<number> {
       })
     }))
   } else if (cliActivity === 'get') {
-    // Ziska a vypise verze v souborech
+    // Read and get version of files.
     await Promise.all(argv._.map(path => {
       return readVersion({
         pathToFile: path,

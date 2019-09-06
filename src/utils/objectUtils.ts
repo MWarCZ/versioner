@@ -1,10 +1,9 @@
 
 /**
- * Najde a vrati hodnotu v danem objektu dle cesty pokud existuje.
- * @param objectWithData JS objekt ve kterem ma byt hledana hodnota.
- * @param pathToDataInObject Cesta pro nalezeni mista s hodnotou v JS objektu.
+ * Finds and returns value in a given object by path, if any.
+ * @param objectWithData JS object in which value should be searched.
+ * @param pathToDataInObject Path to find places with value in JS object..
  */
-// export function getDataFromDataObject(
 export function extractDataFromObject(
   objectWithData: any,
   pathToDataInObject: string,
@@ -19,12 +18,11 @@ export function extractDataFromObject(
 }
 
 /**
- * Pokusi se vlozit novou hodnotu do predaneho JS objektu na danou cestu.
- * @param newData Nova hodnota, ktera bude vlozena do objektu.
- * @param objectWithData JS objekt do ktereho bude vlozena hodnota.
- * @param pathToDataInObject Cesta pro nalezeni mista pro vlozeni hodnoty v JS objektu.
+ * Function try insert a new value into given JS object on given path.
+ * @param newData New value to be inserted into object.
+ * @param objectWithData JS object into which value will be inserted.
+ * @param pathToDataInObject Path to find places for insert value into JS object.
  */
-// export function setDataToDataObject(
 export function injectDataToObject(
   newData: any,
   objectWithData: any,
@@ -37,9 +35,11 @@ export function injectDataToObject(
       if (typeof tmp === 'object') {
         if (index === stepsToDataInFile.length - 1) {
           // Posledni krok => Vloz sem nova data
+          // Last step => Insert new data here
           tmp[step] = newData
         } else if (typeof tmp[step] === 'undefined') {
           // Pokud neexistuje nic, tak vytvor.
+          // If unexist must be create.
           tmp[step] = {}
         }
         return tmp[step]

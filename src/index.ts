@@ -1,5 +1,6 @@
 
 export {
+  // Functions:
   readVersion,
   writeVersion,
   nextVersion,

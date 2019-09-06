@@ -37,10 +37,10 @@ const semver = {
 
 
 /**
- * Precte verzi ulozenou v souboru.
- * @param pathToFile Cesta k souboru.
- * @param pathToVersionInFile Cesta pro nalezeni verze v souboru. (pr. `ver`, `info.version`, `path.to.version`)
- * @param fileType Typ souboru (napr. json).
+ * Function reads version saved in file and returns it in `oldVersion`.
+ * @param pathToFile Path to file.
+ * @param pathToVersionInFile Path to find version in file. Default value is `version`. (e.g. `ver`, `info.version`, `path.to.version`)
+ * @param fileType File type. Default value is `json`.
  */
 export async function readVersion({
     pathToFile,
@@ -58,11 +58,11 @@ export async function readVersion({
   return { oldVersion: version, newVersion: undefined }
 }
 /**
- * Zapise verzi do souboru.
- * @param newVersion Verze, ktera bude zapsana do souboru.
- * @param pathToFile Cesta k souboru.
- * @param pathToVersionInFile Cesta pro nalezeni mista v souboru, kam bude zapsana verze. (pr. `ver`, `info.version`, `path.to.version`)
- * @param fileType Typ souboru (napr. json).
+ * Function writes specified version to file and returns old value in `oldVersionand new value in `newVersion`.
+ * @param newVersion Version, that to be written to file.
+ * @param pathToFile Path to file.
+ * @param pathToVersionInFile Path to find version in file. Default value is `version`. (e.g. `ver`, `info.version`, `path.to.version`)
+ * @param fileType File type. Default value is `json`.
  */
 export async function writeVersion({
   newVersion,
@@ -80,12 +80,14 @@ export async function writeVersion({
   return { oldVersion, newVersion }
 }
 /**
- * Precte puvodni verzi ze souboru ze ktere vygeneruje novou verzi, kterou zapise do souboru.
- * @param releaseType Typ vydani urcujici, jak se verze zmeni (patch, minor, major, prerelease, pre...).
- * @param pathToFile Cesta k souboru.
- * @param pathToVersionInFile Cesta pro naleyeni mista s verzi souboru, ktera bude zmenena. (pr. `ver`, `info.version`, `path.to.version`)
- * @param identifier Identifikator pro typy vydani obsahujici prefix 'pre' (prereleace, prepatch, preminor, premajor).
- * @param fileType Typ souboru (napr. json).
+ * Function reads version from file and generates new version from it,
+ * which is then written to file.
+ * Function returns old version in `oldVersion` and new version in `newVersion`.
+ * @param releaseType Release type that determines how version changes.
+ * @param pathToFile Path to file.
+ * @param pathToVersionInFile Path to find version in file. Default value is `version`. (e.g. `ver`, `info.version`, `path.to.version`)
+ * @param identifier Identifier to use for prefix in pre-release version. Applies to `releaseType` with values `prerelease`, `premajor`, `preminor`,`prepath`.
+ * @param fileType File type. Default value is `json`.
  */
 export async function nextVersion({
   releaseType,
