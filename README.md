@@ -24,7 +24,7 @@ CLI tool and library to make it easier to change versions in project configurati
 versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>] 
 versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
 versioner [-v | --version]
-versioner [-h | --help]
+versioner [-h | --help [<lang>]]
 ```
 ### Options
 - **-s, --set** 
@@ -53,6 +53,8 @@ versioner [-h | --help]
 	- Print version of this tool.
 - **-h, --help**
 	- Print help.
+	- `-h cz` | `-h cs`: Help in Czech language.
+	- `-h` | `-h en`: Help in English language.
 
 -----------
 

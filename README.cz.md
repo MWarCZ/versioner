@@ -26,7 +26,7 @@ CLI nástroj a knihovna pro usnadnění práce při měnění verze v konfigura�
 versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>] 
 versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
 versioner [-v | --version]
-versioner [-h | --help]
+versioner [-h | --help [<lang>]]
 ```
 ### Přepínače
 - **-s, --set** 
@@ -55,6 +55,8 @@ versioner [-h | --help]
 	- Vytiskne verzi tohoto nástroje.
 - **-h, --help**
 	- Vypíše nápovědu.
+	- `-h cz` | `-h cs`: Nápověda v českém jazyku.
+	- `-h` | `-h en`: Nápověda v anglickém jazyku.
 
 ---------
 
