@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "versioner-tool",
-  "version": "1.1.1-beta.1",
+  "version": "2.0.0",
   "description": "CLI tool and library to make it easier to change versions in project configuration files. Suitable for projects where version is stored in multiple locations.",
   "keywords": [],
   "bugs": "https://github.com/MWarCZ/versioner/issues",
