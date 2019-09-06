@@ -9,7 +9,7 @@ interface ParsedArgs extends minimist.ParsedArgs {
   set: string,
   tag: string,
   next: string,
-  help: boolean,
+  help: boolean | string,
   version: boolean,
   preid: string,
   'file-format': string,
@@ -33,7 +33,6 @@ export function parseArgs(nodeProcessArgv: string[]): ParsedArgs {
       'file-format',
     ],
     boolean: [
-      'help',
       'version',
     ],
     default: {
@@ -67,14 +66,14 @@ export function selectCLIActitity(argv:ParsedArgs):CLIActivity {
   return 'unknown'
 }
 
-export function printHelp(lang:string = 'cs-cz') {
-  if (lang === 'cs-cz') {
+export function printHelp(lang:any = 'en') {
+  if (lang === 'cz' || lang === 'cs') {
     logger.info(`
 POUŽITÍ:
   versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
   versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
   versioner [-v | --version]
-  versioner [-h | --help]
+  versioner [-h | --help [<lang>]]
 
 PŘEPÍNAČE:
   -s, --set
@@ -85,22 +84,52 @@ PŘEPÍNAČE:
   \tMožné úrovně:
   \t  major, minor, patch, prerelease, premajor, preminor, prepatch
   -t, --tag
-  \tZmění cestu, kde je hledána verze v souboru.
-  \tPokud není použit přepínač, tak výchozí cesta je 'version'.
-  \tPomocí teček je možné zanořovat se hlouběji do struktury souboru.
+  \tZmění cestu k nalezení verze v souboru.
+  \tPokud není použito, tak výchozí cesta je 'version'.
+  \tKroky v cestě jsou doděleny tečkami.
   --preid
-  \tOznačení použíté pro předbežné verze (např. alfa, beta).
+  \tIdentifikátor, který se použije k předponě v předběžné verzi.
   -f, --file-format
-  \tUrčeni jakého typu/formátu jsou soubory.
+  \tUrčeni typu/formátu soubory.
   \tPodporované hodnoty: 'json'
   -v, --version
-  \tVypíše verzi používaného nástroje.
+  \tVytiskne verzi tohoto nástroje.
   -h, --help
   \tVypíše tuto napovědu.
+  \t'-h cz' | '-h cs': Nápověda v českém jazyku.
+  \t'-h' | '-h en': Nápověda v anglickém jazyku.
     `)
   } else {
     logger.info(`
-Help is not in other languages (only 'cs-cz').
+USAGE:
+  versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
+  versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
+  versioner [-v | --version]
+  versioner [-h | --help [<lang>]]
+
+OPTIONS:
+  -s, --set
+  \tSet specific version in given file(s).
+  \tVersion must be in format 'Major.Minor.Patch'.
+  -n, --next
+  \tIncreases version in file according to specified level.
+  \Possible levels:
+  \t  major, minor, patch, prerelease, premajor, preminor, prepatch
+  -t, --tag
+  \tChanges path to find version in file.
+  \tIf not used, default path is 'version'.
+  \tSteps in path are separated by dots.
+  --preid
+  \tIdentifier to use for prefix in pre-release version.
+  -f, --file-format
+  \tSpecify file type/format.
+  \tSupported values: 'json'
+  -v, --version
+  \tPrint version of this tool.
+  -h, --help
+  \tPrint this help.
+  \t'-h cz' | '-h cs': Help in Czech language.
+  \t'-h' | '-h en': Help in English language.
     `)
   }
 }
@@ -118,9 +147,9 @@ export async function main(precessArgv:any):Promise<number> {
   if (cliActivity === 'version') {
     logger.info(VERSIONER_VERSION)
   } else if (cliActivity === 'help' || !argv._.length) {
-    printHelp()
+    printHelp(argv.help)
   } else if (cliActivity === 'set') {
-    // Ulozi novou verzi do souboru
+    // Save new version into files.
     await Promise.all(argv._.map(path => {
       return writeVersion({
         newVersion: argv.set,
@@ -135,6 +164,7 @@ export async function main(precessArgv:any):Promise<number> {
       })
     }))
   } else if (cliActivity === 'next') {
+    // Generate and save new version for files.
     await Promise.all(argv._.map(path => {
       return nextVersion({
         releaseType: <ReleaseType> argv.next || 'patch',
@@ -150,7 +180,7 @@ export async function main(precessArgv:any):Promise<number> {
       })
     }))
   } else if (cliActivity === 'get') {
-    // Ziska a vypise verze v souborech
+    // Read and get version of files.
     await Promise.all(argv._.map(path => {
       return readVersion({
         pathToFile: path,

@@ -1,5 +1,3 @@
-// Project: versioner
-// File: src/logger.ts
 import jslogger from 'js-logger'
 
 /**

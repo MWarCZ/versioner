@@ -1,8 +1,8 @@
 import { readFileAsync, writeFileAsync } from './promisfyReadWriteFile'
 
 /**
- * Precte data z JSON souboru a pokusi se je prevest na JS objekt.
- * @param path Cesta k souboru.
+ * Function read data from JSON file and will try convert readed data to JS object.
+ * @param path Path to file.
  */
 export async function readFromJsonFile(path: string): Promise<object> {
   const data = await readFileAsync(path)
@@ -16,9 +16,9 @@ export async function readFromJsonFile(path: string): Promise<object> {
 }
 
 /**
- * Zapise JS objekt do JSON souboru.
- * @param path Cesta k souboru.
- * @param data JS objekt, ktery bude preveden na JSON a ulozen do souboru.
+ * Function convert JS object to data that will be written to JSON file.
+ * @param path Path to file.
+ * @param data JS object that will be converted to JSON and written to file.
  */
 export function writeToJsonFile(path: string, data: any) {
   return writeFileAsync(path, JSON.stringify(data, undefined, 2))

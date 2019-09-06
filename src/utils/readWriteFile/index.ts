@@ -4,9 +4,9 @@ import { readFromJsonFile, writeToJsonFile } from './jsonReadWriteFile'
 export type FileType = 'json'
 
 /**
- * Pokusi se precist soubor a obsah prevest na JS objekt.
- * @param pathToFile Cesta k souboru.
- * @param fileType Typ souboru ze ktereho ma byt objekt nacten (napr. json).
+ * Function will try to read file and convert readed data to JS object.
+ * @param pathToFile Path to file.
+ * @param fileType File type. Default value is `json`.
  */
 export async function readObjectFromFile(pathToFile: string, fileType: FileType = 'json') {
   if (fileType === 'json') {
@@ -21,10 +21,10 @@ export async function readObjectFromFile(pathToFile: string, fileType: FileType 
   }
 }
 /**
- * Pokusi se zapsat JS objekt do souboru.
- * @param pathToFile Cesta k souboru.
- * @param dataObject JS objekt, ktery bude zapsan do souboru.
- * @param fileType Typ souboru ze ktereho ma byt objekt nacten (napr. json).
+ * Function will try to write JS object to file.
+ * @param pathToFile Path to file.
+ * @param dataObject JS object which will be written to file.
+ * @param fileType File type. Default value is `json`.
  */
 export async function writeObjectToFile(pathToFile: string, dataObject: any, fileType: FileType = 'json') {
   if (fileType === 'json') {

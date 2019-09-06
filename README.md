@@ -1,101 +1,146 @@
+> Language: [EN](README.md), [CZ](README.cz.md)
+
 # Versioner
-CLI nástroj pro usnadnění práce při měnění verze v konfiguračních souborech v projektech. Vhodné pro projekty, kde je verze uložena na více místech.
- 
-------------
-## Instalace
+
+CLI tool and library to make it easier to change versions in project configuration files. Suitable for projects where version is stored in multiple locations.
+
+---------
+## Install
 - **NPM**
-  - Globální
+  - Global
     - `npm install --global versioner-tool`
-  - Lokální
+  - Local
     - `npm install --save-dev versioner-tool`
     - `npm install -D versioner-tool`
 - **YARN**
-  - Globální
+  - Global
 	- `yarn global add versioner-tool`
-  - Lokální
+  - Local
     - `yarn add --dev versioner-tool`
     - `yarn add -D versioner-tool`
 
---------
-
-## Použití CLI
+## Usage CLI
 ```bash
 versioner <file.json ...> [-s | --set <version>] [-t | --tag <path.to.version>] [-f | --file-format <format>] 
 versioner <file.json ...> [-n | --next <level>] [--preid <preid>] [-t | --tag <path.to.version>] [-f | --file-format <format>]
 versioner [-v | --version]
-versioner [-h | --help]
+versioner [-h | --help [<lang>]]
 ```
-### Přepínače
+### Options
 - **-s, --set** 
-	- Nastaveni konkrétní verze v daném souboru/souborech.
-	- Verze musí být ve formátu `Major.Minor.Patch`
+	- Set specific version in given file(s).
+	- Version must be in format `Major.Minor.Patch`. 
 - **-n, --next**
-	-  Zvýší verzi v souboru dle zadané úrovně.
-	-  Možné úrovně: *major, minor, patch*
+	- Increases version in file according to specified level.
+	- Possible levels: `major`, `minor`, `patch`, `prerelease`, `premajor`, `preminor`, `prepatch`.
 		- `-n path`: *1.2.3* => *1.2.4*
 		- `-n minor`: *1.2.3* => *1.3.0*
 		- `-n major`: *1.2.3* => *2.0.0*
 - **-t, --tag**
-	- Změní cestu, kde je hledána verze v souboru.
-	- Pokud není použit přepínač, tak výchozí cesta je *version*. 
+	- Changes path to find version in file.
+	- If not used, the default path is *version*.
 		- ` `: `{ "version": "1.2.3", ... }`
-	- Pomocí teček je možné zanořovat se hlouběji do struktury souboru.
+	- Steps in path are separated by dots.
 		- `-t ver`: `{ "ver": "1.2.3", ... }`
 		- `-t conf.env.version`: `{ "conf": { "env": { "version": "1.2.3", ... }, ... }, ... }`
 - **--preid** 
-	- Označení použité pro předběžné verze 
-		- např. `prerelease`, `prepatch`, `preminor`, `premajor`
+	- Identifier to use for prefix in pre-release version.
+		- e.g. `prerelease`, `prepatch`, `preminor`, `premajor`
 - **-f, --file-format**
-    - Určení jakého typu/formátu jsou soubory.
-    - Podporované hodnoty: `json`
+    - Specify file type/format.
+    - Supported values: `json`
 - **-v, --version**
-	- Vypíše verzi používaného nástroje ***versioner***.
+	- Print version of this tool.
 - **-h, --help**
-	- Vypíše nápovědu k nástroji ***versioner***.
+	- Print help.
+	- `-h cz` | `-h cs`: Help in Czech language.
+	- `-h` | `-h en`: Help in English language.
 
----------
+-----------
 
-## Použití knihovny
-### Typescript
+## Usage library
+- **Typescript**
 ```typescript
 import { readVersion, writeVersion, nextVersion, ReleaseType } from 'versioner-tool'
-// nebo
+// or
 import * as versioner from 'versioner-tool'
 ```
-### Javascript
+- **Javascript**
 ```javascript
 const readVersion = require('versioner-tool').readVersion
 const writeVersion = require('versioner-tool').writeVersion
 const nextVersion = require('versioner-tool').nextVersion
-// nebo
+// or
 const { readVersion, writeVersion, nextVersion } = require('versioner-tool')
-// nebo
+// or
 const versioner = require('versioner-tool')
 ```
-### Dokumentace
-```ts
-readVersion(pathToFile: string, pathToVersionInFile: string, fileType: string = 'json'): Promise<string>
-```
-- Precte verzi ulozenou v souboru a vrati ji.
-- `pathToFile`: Cesta k souboru.
-- `pathToVersionInFIle`: Cesta pro nalezeni verze v souboru. (pr. `ver`, `info.version`, `path.to.version`)
-- `fileType`: Typ souboru (napr. json).
-```ts
-writeVersion(pathToFile: string, pathToVersionInFile: string, newVersion: string, fileType: string = 'json'): Promise<{ oldVersion: string | undefined, newVersion: string }>
-```
-- Zapise verzi do souboru a vrati starou a novou verzi.
-- `pathToFile`: Cesta k souboru.
-- `pathToVersionInFile`: Cesta pro nalezeni mista v souboru, kam bude zapsana verze. (pr. `ver`, `info.version`, `path.to.version`)
-- `newVersion`: Verze, ktera bude zapsana do souboru.
-- `fileType`: Typ souboru (napr. json).
-```ts
-nextVersion(pathToFile: string, pathToVersionInFile: string, releaseType: ReleaseType, identifier?: string, fileType: string = 'json'): Promise<{ oldVersion: string, newVersion: string }>
-```
-- Precte puvodni verzi ze souboru ze ktere vygeneruje novou verzi, kterou zapise do souboru.
-- `pathToFile`: Cesta k souboru.
-- `pathToVersionInFile`: Cesta pro naleyeni mista s verzi souboru, ktera bude zmenena. (pr. `ver`, `info.version`, `path.to.version`)
-- `releaseType`: Typ vydani urcujici, jak se verze zmeni (patch, minor, major, prerelease, pre...).
-- `identifier`: Identifikator pro typy vydani obsahujici prefix 'pre' (prereleace, prepatch, preminor, premajor).
-- `fileType`: Typ souboru (napr. json).
 
----------------
+### Documentation
+
+```ts
+readVersion(config: {
+	pathToFile: string, 
+	pathToVersionInFile?: string, 
+	fileType?: FileType, 
+}): Promise<{
+  oldVersion: string | undefined,
+  newVersion: string | undefined,
+}>
+```
+- Function reads version saved in file and returns it in `oldVersion`.
+- `pathToFile`: Path to file.
+- `pathToVersionInFIle`: Path to find version in file.
+	- Default value is `version`.
+	- e.g. `ver`, `info.version`, `path.to.version`
+- `fileType`: File type.
+	- Supported types: `json` (In the future `yaml` too.)
+	- Default value is `json`. 
+
+```ts
+writeVersion(config: {
+  newVersion: string,
+  pathToFile: string,
+  pathToVersionInFile?: string,
+  fileType?: FileType,
+}): Promise<{
+  oldVersion: string | undefined,
+  newVersion: string | undefined,
+}>
+```
+- Function writes specified version to file and returns old value in `oldVersion` and new value in `newVersion`.
+- `newVersion`: Version, that to be written to file.
+- `pathToFile`: Path to file.
+- `pathToVersionInFIle`: Path to find version in file.
+	- Default value is `version`.
+	- e.g. `ver`, `info.version`, `path.to.version`
+- `fileType`: File type.
+	- Supported types: `json` (In the future `yaml` too.)
+	- Default value is `json`. 
+
+```ts
+nextVersion(config: {
+  releaseType: ReleaseType,
+  pathToFile: string,
+  pathToVersionInFile?: string,
+  fileType?: FileType,
+  identifier?: string,
+}): Promise<{
+  oldVersion: string | undefined,
+  newVersion: string | undefined,
+}>
+```
+- Function reads version from file and generates new version from it, which is then written to file. Function returns old version in `oldVersion` and new version in `newVersion`.
+- `releaseType`: Release type that determines how version changes.
+	- Supported values: `major`, `minor`, `path`, `prerelease`, `premajor`, `preminor`, `prepath`.
+- `pathToFile`: Path to file.
+- `pathToVersionInFIle`: Path to find version in file.
+	- Default value is `version`.
+	- e.g. `ver`, `info.version`, `path.to.version`
+- `fileType`: File type.
+	- Supported types: `json` (In the future `yaml` too.)
+	- Default value is `json`. 
+- `identifier`: Identifier to use for prefix in pre-release version.
+	- Applies to `releaseType` with values `prerelease`, `premajor`, `preminor`, `prepath`.
+
+--------------
